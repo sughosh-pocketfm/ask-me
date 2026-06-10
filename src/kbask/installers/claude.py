@@ -9,6 +9,7 @@ from pathlib import Path
 from kbask.installers.common import (
     SERVER_NAME,
     backup,
+    check_dependencies,
     install_slash_command,
     resolve_out_dir,
     resolve_uvx,
@@ -29,6 +30,9 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 
 def main(args: argparse.Namespace) -> int:
     repo = Path(args.repo).expanduser().resolve()
+    print("--- kbask dependency check ---")
+    check_dependencies(repo)
+    print("--- end dependency check ---\n")
     out_dir = resolve_out_dir(repo)
     config_path = Path(args.config).expanduser().resolve() if args.config else repo / ".mcp.json"
 

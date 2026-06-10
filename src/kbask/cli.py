@@ -50,6 +50,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("health", help="Print backend versions and graph freshness.")
 
+    p_doctor = sub.add_parser("doctor", help="Check that graphifyy and understand-anything are ready.")
+    p_doctor.add_argument("repo", nargs="?", default=".", help="Repo root. Defaults to cwd.")
+
     return parser
 
 
@@ -80,6 +83,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         from kbask.health import run
 
         return run()
+
+    if args.command == "doctor":
+        from kbask.doctor import run
+
+        return run(Path(args.repo).resolve())
 
     return 2
 

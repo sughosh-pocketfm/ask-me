@@ -15,6 +15,7 @@ from typing import Dict, List, Tuple
 
 
 SERVER_NAME = "kbask"
+REPO_SLUG = "sughosh-pocketfm/kbask"
 
 # `uvx --from <SOURCE>` value. Until PyPI publish, default to the git repo so
 # `uvx` fetches kbask-mcp straight from GitHub. Override with $KBASK_SOURCE or
@@ -79,6 +80,77 @@ def server_args(out_dir: Path, source: str | None = None) -> List[str]:
 
 
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "kbask.md"
+
+
+# ------------------------------------------------------------------
+# Dependency pre-flight
+# ------------------------------------------------------------------
+
+def check_dependencies(repo: Path) -> Dict[str, Dict[str, object]]:
+    """Probe upstreams kbask depends on. Print a status line per check.
+
+    Returns a status dict but the main effect is the printed report:
+
+      [ok]   graphifyy ........... 0.5.0 (importable)
+      [warn] understand-anything . knowledge graph missing — run /understand in Claude Code
+
+    Nothing here aborts. Callers decide whether to continue. The goal
+    is to make missing prerequisites obvious *before* the MCP server
+    silently degrades.
+    """
+    status: Dict[str, Dict[str, object]] = {}
+
+    # graphifyy: hard runtime dep, already in pyproject. Verify importability.
+    try:
+        import graphify  # type: ignore[import-not-found]
+        gv = getattr(graphify, "__version__", "unknown")
+        status["graphifyy"] = {"ok": True, "version": gv, "note": "importable"}
+        print(f"[ok]   graphifyy ........... {gv} (importable)")
+    except ImportError as exc:
+        status["graphifyy"] = {"ok": False, "error": str(exc)}
+        print(
+            "[err]  graphifyy ........... MISSING\n"
+            "       Should have come in via kbask deps. Reinstall:\n"
+            f"         uv tool install --reinstall git+https://github.com/{REPO_SLUG}\n"
+            "       or:\n"
+            f"         uvx --refresh --from git+https://github.com/{REPO_SLUG} kbask --help"
+        )
+
+    # graphify CLI: required for `kbask update` to build the structural graph.
+    if shutil.which("graphify") or shutil.which("uvx"):
+        status["graphify-cli"] = {"ok": True, "note": "graphify or uvx on PATH"}
+        print("[ok]   graphify CLI ........ runnable (graphify or uvx on PATH)")
+    else:
+        status["graphify-cli"] = {"ok": False}
+        print(
+            "[warn] graphify CLI ........ neither `graphify` nor `uvx` on PATH\n"
+            "       Install uv: https://docs.astral.sh/uv/"
+        )
+
+    # understand-anything: LLM-built plugin output; can't be auto-installed.
+    ua_dir = repo / ".understand-anything"
+    ua_graph = ua_dir / "knowledge-graph.json"
+    if ua_graph.exists():
+        try:
+            size_kb = ua_graph.stat().st_size // 1024
+        except OSError:
+            size_kb = 0
+        status["understand-anything"] = {"ok": True, "size_kb": size_kb}
+        print(f"[ok]   understand-anything . {ua_graph} ({size_kb} KB)")
+    else:
+        status["understand-anything"] = {"ok": False}
+        print(
+            "[warn] understand-anything . knowledge graph not built yet\n"
+            "       Semantic tools will return clean 'not built' errors until built.\n"
+            "       To build:\n"
+            "         1. Install the Understand-Anything plugin in Claude Code:\n"
+            "            /plugin marketplace add Lum1104/Understand-Anything\n"
+            "            /plugin install understand-anything\n"
+            "         2. From inside this repo, run: /understand\n"
+            "         3. Then: kbask update ."
+        )
+
+    return status
 
 
 def _read_prompt() -> Tuple[str, str]:

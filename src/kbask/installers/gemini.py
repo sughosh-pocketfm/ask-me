@@ -10,6 +10,7 @@ from pathlib import Path
 from kbask.installers.common import (
     SERVER_NAME,
     backup,
+    check_dependencies,
     install_slash_command,
     resolve_out_dir,
     resolve_uvx,
@@ -34,6 +35,9 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 
 def main(args: argparse.Namespace) -> int:
     repo = Path(args.repo).expanduser().resolve()
+    print("--- kbask dependency check ---")
+    check_dependencies(repo)
+    print("--- end dependency check ---\n")
     out_dir = resolve_out_dir(repo)
     gemini_home = Path(args.gemini_home).expanduser().resolve()
     config_path = gemini_home / "settings.json"

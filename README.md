@@ -96,6 +96,30 @@ uvx --from kbask kbask install claude --repo .
 
 After restart, you can invoke the slash command from chat: type `/kbask how does X work?` (or just `/kbask` to see its prompt).
 
+### Dependency preflight
+
+Both `kbask install <host>` and `kbask update` print a status report for the upstreams kbask depends on:
+
+```
+[ok]   graphifyy ........... 0.5.0 (importable)
+[ok]   graphify CLI ........ runnable (graphify or uvx on PATH)
+[warn] understand-anything . knowledge graph not built yet
+       To build:
+         1. /plugin marketplace add Lum1104/Understand-Anything
+         2. /plugin install understand-anything    (inside Claude Code)
+         3. /understand                             (from this repo, in Claude Code)
+         4. kbask update .
+```
+
+Run it standalone any time:
+
+```bash
+kbask doctor [path/to/repo]
+```
+
+- `graphifyy` is a hard dep — installed transitively with kbask.
+- `understand-anything` is built by an LLM in Claude Code (no analyzer binary). Even Codex / Gemini users build the graph via Claude Code once, then kbask mirrors it.
+
 ### Pin to a fork or tag
 
 ```bash

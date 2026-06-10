@@ -59,6 +59,11 @@ def _hash_repo(repo: Path) -> Dict[str, str]:
 def run(repo: Path, *, force: bool, dry_run: bool, structural_only: bool) -> int:
     logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="kbask: %(message)s")
 
+    from kbask.installers.common import check_dependencies
+    print("--- kbask dependency check ---")
+    check_dependencies(repo)
+    print("--- end dependency check ---\n")
+
     out_dir = repo / "kbask-out"
     graph_path = out_dir / "graph.json"
     knowledge_graph_path = out_dir / "knowledge-graph.json"
