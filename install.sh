@@ -2,10 +2,10 @@
 # kbask one-line installer.
 #
 # Public repo:
-#   curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/ask-me/main/install.sh | bash -s claude
+#   curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/install.sh | bash -s claude
 #
 # Private repo (uses your gh CLI auth):
-#   gh api repos/sughosh-pocketfm/ask-me/contents/install.sh -H "Accept: application/vnd.github.raw" | bash -s claude
+#   gh api repos/sughosh-pocketfm/kbask/contents/install.sh -H "Accept: application/vnd.github.raw" | bash -s claude
 #
 # Args:
 #   $1  host  one of: claude | codex | gemini | agy   (default: claude)

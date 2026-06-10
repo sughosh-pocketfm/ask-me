@@ -81,28 +81,28 @@ Run from inside the project repo you want indexed.
 ### Public repo — curl
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/ask-me/main/install.sh | bash -s claude
+curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/install.sh | bash -s claude
 # or codex / gemini
 ```
 
 ### Private repo — via gh CLI (uses your OAuth)
 
 ```bash
-gh api repos/sughosh-pocketfm/ask-me/contents/install.sh \
+gh api repos/sughosh-pocketfm/kbask/contents/install.sh \
    -H "Accept: application/vnd.github.raw" | bash -s claude
 ```
 
 The bootstrap script:
 1. Configures git credentials via `gh auth setup-git` (so `uvx` can fetch the private repo).
 2. Installs `uv` if missing.
-3. Runs `uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install <host> --repo $(pwd)`.
+3. Runs `uvx --from git+https://github.com/sughosh-pocketfm/kbask kbask install <host> --repo $(pwd)`.
 
 ### Skip the bootstrap (`uvx` direct)
 
 ```bash
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install claude --repo .
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install codex  --repo .
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install gemini --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/kbask kbask install claude --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/kbask kbask install codex  --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/kbask kbask install gemini --repo .
 ```
 
 What it does:
@@ -284,7 +284,7 @@ This is an alpha MVP. APIs may change.
 ## Development
 
 ```bash
-git clone https://github.com/sughosh-pocketfm/ask-me.git
+git clone https://github.com/sughosh-pocketfm/kbask.git
 cd ask-me
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"

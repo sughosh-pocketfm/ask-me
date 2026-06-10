@@ -24,7 +24,7 @@ the synthesis — `kbask` itself never calls a model.
 Host-agnostic: works in any MCP-compatible client (Claude Code, Codex
 CLI, Gemini CLI, AGY future).
 
-Public repo: <https://github.com/sughosh-pocketfm/ask-me>.
+Public repo: <https://github.com/sughosh-pocketfm/kbask>.
 PyPI name target: `kbask` (fallback `kbask`).
 
 ---
