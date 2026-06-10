@@ -26,60 +26,94 @@ Graphify tells you **where** things are. Understand-Anything tells you **why** t
 
 ## Install
 
-> **Status:** `kbask` is **not yet on PyPI**. Install from a GitHub Release or
-> directly from source. Once published, `--from kbask` resolves from PyPI
-> without changes.
+> **Status:** `kbask` is **not yet on PyPI**. Install from a GitHub Release,
+> from `main`, or pinned to a tag. Once on PyPI, `--from kbask` resolves
+> from there with no other change.
 
-Two install styles. Pick one:
+Releases are cut as `vX.Y.Z` git tags. The `release` GitHub Action
+builds a wheel + sdist, attaches them (and `install.sh` / `tool-install.sh` /
+`SHA256SUMS`) to the GitHub Release, and — if `PYPI_TOKEN` is configured —
+uploads the wheel to PyPI. See **[Releases](#releases)** for the cut process.
 
-### A. Persistent CLI (`uv tool install`)
+Pick the install style that matches your workflow:
 
-Puts `kbask` on your PATH for repeated use:
+### A. Persistent CLI (`uv tool install`) — recommended
+
+Puts `kbask` on your PATH so you can type it like any other tool:
 
 ```bash
+# Latest release (auto-discovers GitHub Release wheel)
 curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/tool-install.sh | bash
+
+# Pin to a specific release tag
+KBASK_TAG=v0.1.0 \
+  curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/tool-install.sh | bash
 ```
 
 The script:
-1. Installs `uv` if missing.
-2. Resolves the latest GitHub Release wheel (`KBASK_TAG=v0.1.1` to pin).
-3. Falls back to `git+https://github.com/sughosh-pocketfm/kbask` if no release exists yet.
-4. Runs `uv tool install` so `kbask` lands in `$HOME/.local/bin`.
+1. Installs `uv` if missing (Astral installer).
+2. Hits `https://api.github.com/repos/sughosh-pocketfm/kbask/releases/latest`
+   to find the wheel asset. Pin a release with `KBASK_TAG=vX.Y.Z`.
+3. Falls back to `git+https://github.com/sughosh-pocketfm/kbask` if no
+   release exists yet (or for `main`).
+4. Runs `uv tool install --force` so `kbask` lands in `~/.local/bin`.
 
 After install:
 ```bash
-kbask install claude --repo .
-kbask update .
+kbask install claude --repo .     # wire MCP into Claude Code
+kbask update .                    # build/refresh knowledge graph
+kbask doctor                      # check dependencies
 kbask --help
 ```
 
-Upgrade later:
+Upgrade:
 ```bash
 uv tool upgrade kbask
-# or rerun the curl one-liner
+# or rerun the curl one-liner (always uses --force)
 ```
 
-### B. One-shot installer for an MCP host
+### B. One-shot host installer (no persistent CLI)
 
-Wires kbask into a single host's MCP config without leaving a persistent `kbask` binary:
+Wires kbask into a single MCP host's config without leaving a global
+`kbask` binary. The MCP server itself is spawned by the host via
+`uvx --from git+...` on demand.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/install.sh | bash -s claude
 # or: bash -s codex   |   bash -s gemini
+
+# Pin to a tag (the MCP config gets the same pin):
+KBASK_SOURCE="git+https://github.com/sughosh-pocketfm/kbask@v0.1.0" \
+  curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/install.sh | bash -s claude
 ```
 
-The host config itself uses `uvx --from git+...` so the MCP server runs
-without a global install.
-
-### Manual paths
+### C. Direct uvx (no scripts)
 
 ```bash
-# uvx direct (no scripts)
+# Latest main
 uvx --from git+https://github.com/sughosh-pocketfm/kbask kbask install claude --repo .
 
-# After PyPI publish
-uv tool install kbask
-uvx --from kbask kbask install claude --repo .
+# Pinned tag
+uvx --from "git+https://github.com/sughosh-pocketfm/kbask@v0.1.0" kbask install claude --repo .
+
+# From a downloaded wheel (verify SHA256SUMS first)
+uvx --from ./kbask-0.1.0-py3-none-any.whl kbask install claude --repo .
+```
+
+### D. After PyPI publish
+
+Everything above keeps working, plus:
+```bash
+uv tool install kbask                  # persistent CLI
+uvx --from kbask kbask install claude  # one-shot
+uvx kbask --help                       # script + pkg share name
+```
+
+### Verify a release artifact
+
+```bash
+# From the release page, grab SHA256SUMS + the wheel
+shasum -a 256 -c SHA256SUMS
 ```
 
 ### What the installer does
@@ -120,7 +154,7 @@ kbask doctor [path/to/repo]
 - `graphifyy` is a hard dep — installed transitively with kbask.
 - `understand-anything` is built by an LLM in Claude Code (no analyzer binary). Even Codex / Gemini users build the graph via Claude Code once, then kbask mirrors it.
 
-### Pin to a fork or tag
+### Pin to a fork
 
 ```bash
 KBASK_SOURCE=git+https://github.com/your-fork/kbask@v0.2.0 \
@@ -363,24 +397,78 @@ Design rules:
 
 ## Releases
 
-Cutting a release:
+### Versioning
+
+`v<MAJOR>.<MINOR>.<PATCH>` (SemVer). Pre-1.0 — breaking changes can land on any minor bump.
+
+The CI release job hard-fails when the tag and the version in `pyproject.toml` disagree, so keep these in sync:
+
+- `pyproject.toml` → `[project] version`
+- `src/kbask/__init__.py` → `__version__`
+
+### Cutting a release
 
 ```bash
-# 1. Bump pyproject.toml `version` and src/kbask/__init__.py `__version__` (keep them in sync).
-# 2. Commit and tag:
+# 1. Bump versions (must match the tag without the `v` prefix).
+#    pyproject.toml:        version = "0.1.1"
+#    src/kbask/__init__.py: __version__ = "0.1.1"
+
+# 2. Commit + tag + push.
 git commit -am "Release v0.1.1"
 git tag v0.1.1
 git push origin main --tags
 ```
 
-The `release` GitHub Action (`.github/workflows/release.yml`) fires on the tag:
-- Builds wheel + sdist via `uv build`.
-- Smoke-tests the wheel (`kbask --help`).
-- Generates `SHA256SUMS`.
-- Creates a GitHub Release with `*.whl`, `*.tar.gz`, `SHA256SUMS`, `install.sh`, and `tool-install.sh` attached.
-- Publishes to PyPI if the `PYPI_TOKEN` repo secret is set.
+Manual run (e.g. to re-cut from a fixed branch) is also supported:
 
-`tool-install.sh` (curl path) auto-discovers the latest release and prefers the wheel asset over the git source.
+```bash
+gh workflow run release.yml -f tag=v0.1.1
+```
+
+### What the release pipeline does
+
+`.github/workflows/release.yml` on tag push:
+
+1. Checks out at the tag.
+2. Sets up `uv` and Python 3.11.
+3. Verifies `pyproject.toml version == tag without the leading v`. Aborts otherwise.
+4. `uv build` → `dist/kbask-X.Y.Z-py3-none-any.whl` and `dist/kbask-X.Y.Z.tar.gz`.
+5. Smoke-tests the wheel — `pip install` + `kbask --help` must succeed.
+6. Generates `SHA256SUMS`.
+7. Creates the GitHub Release with auto-generated changelog and the following assets attached:
+   - `kbask-X.Y.Z-py3-none-any.whl`
+   - `kbask-X.Y.Z.tar.gz`
+   - `SHA256SUMS`
+   - `install.sh`           (one-shot host installer bootstrap)
+   - `tool-install.sh`      (`uv tool install` bootstrap)
+8. Publishes to PyPI **only if** the `PYPI_TOKEN` repo secret is configured.
+
+### Required repo secrets
+
+| Secret | Purpose | Optional? |
+|---|---|---|
+| `PYPI_TOKEN` | `uv publish` API token | Yes — release runs without it; only PyPI step is skipped. |
+
+`GITHUB_TOKEN` is provided automatically (used by `softprops/action-gh-release` for the Release write).
+
+### Consumer install paths after release
+
+Once the release exists:
+
+```bash
+# A. Persistent CLI — auto-finds the wheel
+curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/tool-install.sh | bash
+
+# B. Pinned tag
+KBASK_TAG=v0.1.1 curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/kbask/main/tool-install.sh | bash
+
+# C. Direct download
+gh release download v0.1.1 --repo sughosh-pocketfm/kbask --pattern '*.whl'
+shasum -a 256 -c SHA256SUMS
+uv tool install ./kbask-0.1.1-py3-none-any.whl
+```
+
+`tool-install.sh` hits `GET /repos/{owner}/{repo}/releases/latest` to discover the newest tag and prefers the wheel asset over the git source.
 
 ---
 
@@ -388,14 +476,19 @@ The `release` GitHub Action (`.github/workflows/release.yml`) fires on the tag:
 
 | Capability | State |
 |---|---|
-| Repo scaffold + MCP stdio entry | ✅ |
-| Graphify pass-through tools | 🚧 wiring in progress |
-| Incremental `kbask update` | ✅ implemented (structural rebuild + semantic mirror) |
-| Structural MCP tools (Graphify) | ✅ wired via `graphify.serve` internals |
-| Semantic MCP tools (Understand-Anything) | ✅ read knowledge-graph.json directly |
-| Hybrid `ask` / `trace` / `onboard` | ✅ compose structural + semantic |
-| Hybrid `ask` / `trace` / `onboard` | 🚧 stubs |
-| Claude / Codex / Gemini installers | 🚧 in progress |
+| MCP stdio server + 15 tools | ✅ |
+| Structural tools via `graphify.serve` internals | ✅ |
+| Semantic tools reading mirrored knowledge graph | ✅ |
+| Hybrid `ask` / `trace` / `onboard` (3-stage cascade) | ✅ |
+| Incremental `kbask update` | ✅ structural rebuild + semantic mirror |
+| Per-tool `_meta.tokens` accounting | ✅ heuristic; `kbask[tokens]` extra for tiktoken |
+| Tolerant node lookup (path / basename / label / id) | ✅ |
+| Dependency preflight (`kbask doctor`) | ✅ |
+| `/kbask` slash command writer (Claude/Codex/Gemini) | ✅ |
+| Installer scripts (Claude/Codex/Gemini) | ✅ |
+| `tool-install.sh` + `install.sh` curl bootstraps | ✅ |
+| GitHub Release pipeline (wheel/sdist/checksums) | ✅ |
+| PyPI publish | ⏳ token not yet configured |
 | AGY installer | ⏳ blocked on config-path docs |
 
 This is an alpha MVP. APIs may change.
