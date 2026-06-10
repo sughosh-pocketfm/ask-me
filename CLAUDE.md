@@ -1,4 +1,4 @@
-# CLAUDE.md — kbask-mcp
+# CLAUDE.md — kbask
 
 Guidance for Claude Code (and other AI agents) working in this repo.
 
@@ -6,7 +6,7 @@ Guidance for Claude Code (and other AI agents) working in this repo.
 
 ## What this project is
 
-`kbask-mcp` is a single Python MCP (Model Context Protocol) server that
+`kbask` is a single Python MCP (Model Context Protocol) server that
 joins two upstream code-analysis tools into one MCP endpoint:
 
 - **[Graphify](https://pypi.org/project/graphifyy/)** — deterministic
@@ -25,7 +25,7 @@ Host-agnostic: works in any MCP-compatible client (Claude Code, Codex
 CLI, Gemini CLI, AGY future).
 
 Public repo: <https://github.com/sughosh-pocketfm/ask-me>.
-PyPI name target: `kbask-mcp` (fallback `kbask`).
+PyPI name target: `kbask` (fallback `kbask`).
 
 ---
 
@@ -121,7 +121,7 @@ In the **user's** project repo at runtime:
 ### Startup
 ```
 host (Claude/Codex/Gemini)
-  └─ spawns: uvx --from kbask-mcp kbask serve <kbask-out>
+  └─ spawns: uvx --from kbask kbask serve <kbask-out>
        └─ kbask.cli.main()
             └─ kbask.serve.run(out_dir)
                  ├─ state.set_out_dir(out_dir)

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "kbask-mcp"
+name = "kbask"
 version = "0.1.0"
 description = "Hybrid MCP server combining Graphify structural code graphs with Understand-Anything semantic knowledge bases."
 readme = "README.md"

@@ -19,7 +19,7 @@ SERVER_NAME = "kbask"
 # `uvx --from <SOURCE>` value. Until PyPI publish, default to the git repo so
 # `uvx` fetches kbask-mcp straight from GitHub. Override with $KBASK_SOURCE or
 # --source.
-DEFAULT_SOURCE = "git+https://github.com/sughosh-pocketfm/ask-me"
+DEFAULT_SOURCE = "kbask"
 
 EXPECTED_TOOLS = {
     "query_graph", "get_node", "get_neighbors", "get_community",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# kbask-mcp one-line installer.
+# kbask one-line installer.
 #
 # Public repo:
 #   curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/ask-me/main/install.sh | bash -s claude
@@ -20,7 +20,7 @@ set -euo pipefail
 HOST="${1:-claude}"
 shift || true
 
-SOURCE="${KBASK_SOURCE:-git+https://github.com/sughosh-pocketfm/ask-me}"
+SOURCE="${KBASK_SOURCE:-kbask}"
 REPO="${KBASK_REPO:-$(pwd)}"
 
 say() { printf '[kbask-install] %s\n' "$*" >&2; }

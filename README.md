@@ -1,4 +1,4 @@
-# kbask-mcp
+# kbask
 
 Hybrid MCP server that combines **[Graphify](https://github.com/graphifyy)** (structural code graphs) with **[Understand-Anything](https://github.com/Lum1104/Understand-Anything)** (LLM-derived semantic knowledge bases) into a single MCP endpoint.
 
@@ -30,7 +30,7 @@ Graphify tells you **where** things are. Understand-Anything tells you **why** t
 
 ```bash
 cd /path/to/your/project
-uvx --from kbask-mcp kbask update .
+uvx --from kbask kbask update .
 ```
 
 This produces `kbask-out/` with:
@@ -50,13 +50,13 @@ Pick the installer for your host (see [Host setup](#host-setup) below):
 
 ```bash
 # Claude Code (project-scope .mcp.json)
-uvx --from kbask-mcp kbask install claude
+uvx --from kbask kbask install claude
 
 # Codex CLI
-uvx --from kbask-mcp kbask install codex
+uvx --from kbask kbask install codex
 
 # Gemini CLI
-uvx --from kbask-mcp kbask install gemini
+uvx --from kbask kbask install gemini
 ```
 
 Each installer writes a single `kbask` MCP server entry pointing at `kbask-out/` in the current project, with a timestamped backup of any existing config and a post-install MCP smoke test.
@@ -119,7 +119,7 @@ KBASK_SOURCE=git+https://github.com/your-fork/ask-me@v0.2.0 \
   uvx --from $KBASK_SOURCE kbask install claude --repo .
 ```
 
-Once PyPI publish lands you can swap `git+https://...` for `kbask-mcp`.
+Once PyPI publish lands you can swap `git+https://...` for `kbask`.
 
 ---
 
@@ -164,13 +164,13 @@ Project-scope `.mcp.json` at your repo root:
     "kbask": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "kbask-out/"]
+      "args": ["--from", "kbask", "--with", "mcp", "kbask", "serve", "kbask-out/"]
     }
   }
 }
 ```
 
-Or run `uvx --from kbask-mcp kbask install claude` to write this for you.
+Or run `uvx --from kbask kbask install claude` to write this for you.
 
 ### Codex CLI
 
@@ -178,12 +178,12 @@ Writes to `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`):
 
 ```toml
 [mcp_servers.kbask]
-args = ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
+args = ["--from", "kbask", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
 command = "uvx"
 startup_timeout_sec = 120
 ```
 
-Run `uvx --from kbask-mcp kbask install codex` to write this for you.
+Run `uvx --from kbask kbask install codex` to write this for you.
 
 ### Gemini CLI
 
@@ -194,13 +194,13 @@ Writes `mcpServers` block into `~/.gemini/settings.json`:
   "mcpServers": {
     "kbask": {
       "command": "uvx",
-      "args": ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
+      "args": ["--from", "kbask", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
     }
   }
 }
 ```
 
-Run `uvx --from kbask-mcp kbask install gemini` to write this for you.
+Run `uvx --from kbask kbask install gemini` to write this for you.
 
 ### AGY
 
@@ -239,7 +239,7 @@ All tools return structured JSON. None of them call an LLM internally — they r
 ## Architecture
 
 ```
-kbask-mcp (Python, stdio MCP)
+kbask (Python, stdio MCP)
 ├── backends/
 │   ├── graphify.py        # imports graphifyy as a library (no subprocess)
 │   └── understand.py      # spawns Node subprocess against @understand-anything/core
