@@ -76,16 +76,32 @@ askme.semantic_explain("aural/player/data/.../PlayerManager.kt")
 
 ## Install in one command (no clone)
 
-Run from any project repo. `uvx` fetches `askme-mcp` straight from GitHub:
+Run from inside the project repo you want indexed.
+
+### Public repo — curl
 
 ```bash
-# Claude Code — writes <repo>/.mcp.json
+curl -fsSL https://raw.githubusercontent.com/sughosh-pocketfm/ask-me/main/install.sh | bash -s claude
+# or codex / gemini
+```
+
+### Private repo — via gh CLI (uses your OAuth)
+
+```bash
+gh api repos/sughosh-pocketfm/ask-me/contents/install.sh \
+   -H "Accept: application/vnd.github.raw" | bash -s claude
+```
+
+The bootstrap script:
+1. Configures git credentials via `gh auth setup-git` (so `uvx` can fetch the private repo).
+2. Installs `uv` if missing.
+3. Runs `uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install <host> --repo $(pwd)`.
+
+### Skip the bootstrap (`uvx` direct)
+
+```bash
 uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install claude --repo .
-
-# Codex CLI — writes ~/.codex/config.toml
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install codex --repo .
-
-# Gemini CLI — writes ~/.gemini/settings.json
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install codex  --repo .
 uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install gemini --repo .
 ```
 
