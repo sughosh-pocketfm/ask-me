@@ -74,6 +74,39 @@ askme.semantic_explain("aural/player/data/.../PlayerManager.kt")
 
 ---
 
+## Install in one command (no clone)
+
+Run from any project repo. `uvx` fetches `askme-mcp` straight from GitHub:
+
+```bash
+# Claude Code — writes <repo>/.mcp.json
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install claude --repo .
+
+# Codex CLI — writes ~/.codex/config.toml
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install codex --repo .
+
+# Gemini CLI — writes ~/.gemini/settings.json
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install gemini --repo .
+```
+
+What it does:
+
+1. Creates `<repo>/askme-out/` if missing.
+2. Appends `askme-out/` to `<repo>/.gitignore`.
+3. Writes/upserts the host's config (with a timestamped backup of any existing file).
+4. Runs an MCP `initialize` + `tools/list` smoke test against the configured server.
+
+Override the source if you fork the repo or pin to a tag:
+
+```bash
+ASKME_SOURCE=git+https://github.com/your-fork/ask-me@v0.2.0 \
+  uvx --from $ASKME_SOURCE askme install claude --repo .
+```
+
+Once PyPI publish lands you can swap `git+https://...` for `askme-mcp`.
+
+---
+
 ## Incremental updates
 
 `askme update` is a single command. There is no `--structural` / `--semantic` split — `askme` figures out what changed and only regenerates the missing slice:

@@ -85,12 +85,14 @@ ask-me/
 │       ├── structural.py       # passthrough to backends.graphify
 │       ├── semantic.py         # passthrough to backends.understand
 │       └── hybrid.py           # ask / trace / onboard — compose both
+│   ├── installers/             # ships in wheel — `askme install <host>` dispatcher
+│   │   ├── common.py           # backup/upsert/smoke-test, $ASKME_SOURCE default
+│   │   ├── claude.py           # writes <repo>/.mcp.json (project-scope)
+│   │   ├── codex.py            # writes ~/.codex/config.toml
+│   │   ├── gemini.py           # writes ~/.gemini/settings.json
+│   │   └── agy.py              # placeholder, format unknown
 ├── scripts/
-│   ├── _installer_common.py    # shared backup/upsert/smoke-test helpers
-│   ├── install-claude.py       # writes <repo>/.mcp.json (project-scope)
-│   ├── install-codex.py        # writes ~/.codex/config.toml
-│   ├── install-gemini.py       # writes ~/.gemini/settings.json
-│   └── install-agy.py          # TODO placeholder, format unknown
+│   └── install-{host}.py       # thin trampolines into askme.installers.*
 └── tests/
     └── test_diff.py            # delta logic tests (added/modified/removed/unchanged)
 ```

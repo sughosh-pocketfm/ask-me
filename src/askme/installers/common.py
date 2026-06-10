@@ -15,6 +15,12 @@ from typing import Dict, List, Tuple
 
 
 SERVER_NAME = "askme"
+
+# `uvx --from <SOURCE>` value. Until PyPI publish, default to the git repo so
+# `uvx` fetches askme-mcp straight from GitHub. Override with $ASKME_SOURCE or
+# --source.
+DEFAULT_SOURCE = "git+https://github.com/sughosh-pocketfm/ask-me"
+
 EXPECTED_TOOLS = {
     "query_graph", "get_node", "get_neighbors", "get_community",
     "god_nodes", "graph_stats", "shortest_path",
@@ -38,7 +44,7 @@ def resolve_out_dir(repo: Path) -> Path:
     if not out.exists():
         out.mkdir(parents=True, exist_ok=True)
         print(f"created {out}")
-        print("populate it with:  uvx --from askme-mcp askme update .")
+        print(f"populate it with:  uvx --from {DEFAULT_SOURCE} askme update .")
     ensure_gitignore(repo, "askme-out/")
     return out
 
@@ -60,8 +66,16 @@ def ensure_gitignore(repo: Path, pattern: str) -> None:
         print(f"created {gi} with '{pattern}'")
 
 
-def server_args(out_dir: Path) -> List[str]:
-    return ["--from", "askme-mcp", "--with", "mcp", "askme", "serve", str(out_dir)]
+def resolve_source(explicit: str | None = None) -> str:
+    return explicit or os.environ.get("ASKME_SOURCE") or DEFAULT_SOURCE
+
+
+def server_args(out_dir: Path, source: str | None = None) -> List[str]:
+    return [
+        "--from", resolve_source(source),
+        "--with", "mcp",
+        "askme", "serve", str(out_dir),
+    ]
 
 
 def backup(path: Path) -> Path:

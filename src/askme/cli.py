@@ -33,14 +33,20 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Graphify only, skip semantic rebuild.",
     )
 
-    p_install = sub.add_parser("install", help="Install askme MCP server into a host config.")
+    p_install = sub.add_parser(
+        "install",
+        help="Install askme MCP server into a host config.",
+    )
     p_install.add_argument(
         "host",
-        choices=("claude", "codex", "gemini"),
-        help="Target host. AGY is not yet supported.",
+        choices=("claude", "codex", "gemini", "agy"),
+        help="Target host. AGY is a placeholder until config format is confirmed.",
     )
-    p_install.add_argument("--repo", default=".", help="Repo root used to resolve askme-out/.")
-    p_install.add_argument("--dry-run", action="store_true")
+    p_install.add_argument(
+        "host_args",
+        nargs=argparse.REMAINDER,
+        help="Forwarded to the per-host installer (e.g. --repo, --dry-run, --skip-smoke-test).",
+    )
 
     sub.add_parser("health", help="Print backend versions and graph freshness.")
 
@@ -68,7 +74,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "install":
         from askme.install import run
 
-        return run(host=args.host, repo=Path(args.repo).resolve(), dry_run=args.dry_run)
+        return run(host=args.host, extra_args=args.host_args)
 
     if args.command == "health":
         from askme.health import run
