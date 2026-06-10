@@ -5,12 +5,12 @@ is built by an LLM (typically Claude Code) following prompts defined by
 the upstream plugin, and persisted to `.understand-anything/knowledge-graph.json`
 inside the user's repo.
 
-askme treats that JSON file as **input data**:
+kbask treats that JSON file as **input data**:
 
-  - `askme update` copies the latest `.understand-anything/knowledge-graph.json`
-    into `askme-out/knowledge-graph.json` (so MCP queries hit a single dir).
+  - `kbask update` copies the latest `.understand-anything/knowledge-graph.json`
+    into `kbask-out/knowledge-graph.json` (so MCP queries hit a single dir).
   - MCP semantic tools read the cached copy directly — no Node subprocess,
-    no LLM call from inside askme.
+    no LLM call from inside kbask.
 
 If the user has never run Understand-Anything against the repo, the cache
 file is absent and semantic tools return a clear "graph not built" error
@@ -24,7 +24,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from askme import state
+from kbask import state
 
 
 class UnderstandUnavailable(RuntimeError):
@@ -68,7 +68,7 @@ def update(repo: Path, knowledge_graph_path: Path, dirty: List[str], full_rebuil
     """Mirror `<repo>/.understand-anything/knowledge-graph.json` into our cache.
 
     Incremental rebuilding of the *upstream* graph is owned by Claude Code
-    (via the Understand-Anything plugin's auto-update prompt). askme simply
+    (via the Understand-Anything plugin's auto-update prompt). kbask simply
     refreshes its own copy after the upstream file changes.
 
     `dirty` and `full_rebuild` are accepted for API parity with the
@@ -101,7 +101,7 @@ def _load_kg() -> Dict[str, Any]:
     if not path.exists():
         raise UnderstandUnavailable(
             f"knowledge-graph.json not found at {path}. "
-            "Run `askme update <repo>` after building it with Understand-Anything."
+            "Run `kbask update <repo>` after building it with Understand-Anything."
         )
     key = str(path.resolve()) + ":" + str(path.stat().st_mtime_ns)
     if _kg_cache.get("key") == key:
@@ -205,7 +205,7 @@ def semantic_chat(question: str, scope: Optional[str] = None) -> Dict[str, Any]:
 
 
 def semantic_diff(base: str, head: str = "HEAD") -> Dict[str, Any]:
-    # askme does not run git diff itself — we surface what the host's diff
+    # kbask does not run git diff itself — we surface what the host's diff
     # tool found by reading the diff-context entries Understand-Anything
     # writes when /understand-diff has been used. If none, return guidance.
     data = _load_kg()

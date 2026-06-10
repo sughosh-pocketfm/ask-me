@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from askme.backends import understand
+from kbask.backends import understand
 
 
 def semantic_explain(target: str) -> Dict[str, Any]:

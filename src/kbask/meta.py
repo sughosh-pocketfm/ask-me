@@ -23,7 +23,7 @@ class FileEntry:
 @dataclass
 class Meta:
     schema_version: int = SCHEMA_VERSION
-    askme_version: str = ""
+    kbask_version: str = ""
     graphify_version: str = ""
     understand_version: str = ""
     git_sha: str = ""
@@ -33,7 +33,7 @@ class Meta:
     def to_json(self) -> dict:
         return {
             "schema_version": self.schema_version,
-            "askme_version": self.askme_version,
+            "kbask_version": self.kbask_version,
             "graphify_version": self.graphify_version,
             "understand_version": self.understand_version,
             "git_sha": self.git_sha,
@@ -46,7 +46,7 @@ class Meta:
         files = {path: FileEntry(**entry) for path, entry in data.get("files", {}).items()}
         return cls(
             schema_version=data.get("schema_version", SCHEMA_VERSION),
-            askme_version=data.get("askme_version", ""),
+            kbask_version=data.get("kbask_version", ""),
             graphify_version=data.get("graphify_version", ""),
             understand_version=data.get("understand_version", ""),
             git_sha=data.get("git_sha", ""),

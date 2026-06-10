@@ -1,5 +1,5 @@
-# askme runtime artifacts
-askme-out/
+# kbask runtime artifacts
+kbask-out/
 
 # Python
 __pycache__/

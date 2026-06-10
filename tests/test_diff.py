@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from askme.diff import compute, carry_forward
-from askme.meta import FileEntry, Meta
+from kbask.diff import compute, carry_forward
+from kbask.meta import FileEntry, Meta
 
 
 def _meta_with(files: dict[str, tuple[str, str | None]]) -> Meta:

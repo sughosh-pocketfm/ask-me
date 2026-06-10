@@ -1,7 +1,7 @@
 """MCP tool registrations for structural (Graphify) queries.
 
-Each function here is wrapped as an MCP tool in askme.serve. Handlers are
-intentionally thin — they delegate to askme.backends.graphify which reuses
+Each function here is wrapped as an MCP tool in kbask.serve. Handlers are
+intentionally thin — they delegate to kbask.backends.graphify which reuses
 the upstream Graphify traversal helpers.
 """
 
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from askme.backends import graphify
+from kbask.backends import graphify
 
 
 def query_graph(question: str, depth: int = 3, mode: str = "bfs", token_budget: int = 2000) -> Dict[str, Any]:

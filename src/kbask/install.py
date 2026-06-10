@@ -1,6 +1,6 @@
-"""`askme install <host>` — in-process dispatcher to per-host installers.
+"""`kbask install <host>` — in-process dispatcher to per-host installers.
 
-Each installer module under `askme.installers` exposes:
+Each installer module under `kbask.installers` exposes:
   - `add_arguments(parser)`: register host-specific CLI flags
   - `main(args)`: do the install, return exit code
 
@@ -17,24 +17,24 @@ import sys
 from typing import List, Sequence
 
 
-logger = logging.getLogger("askme.install")
+logger = logging.getLogger("kbask.install")
 
 
 HOSTS = ("claude", "codex", "gemini", "agy")
 
 
 def _module(host: str):
-    return importlib.import_module(f"askme.installers.{host}")
+    return importlib.import_module(f"kbask.installers.{host}")
 
 
 def run(host: str, extra_args: Sequence[str] | None = None) -> int:
     """Run the installer for `host`, forwarding `extra_args` to its argparse."""
-    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="askme: %(message)s")
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="kbask: %(message)s")
     if host not in HOSTS:
         logger.error("unknown host %r; choose from %s", host, ", ".join(HOSTS))
         return 1
     mod = _module(host)
-    parser = argparse.ArgumentParser(prog=f"askme install {host}")
+    parser = argparse.ArgumentParser(prog=f"kbask install {host}")
     mod.add_arguments(parser)
     ns = parser.parse_args(list(extra_args or []))
     return mod.main(ns)

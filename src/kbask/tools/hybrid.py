@@ -1,8 +1,8 @@
 """Hybrid MCP tools that compose Graphify + Understand-Anything.
 
-The value proposition of askme lives here. Each hybrid tool returns a
+The value proposition of kbask lives here. Each hybrid tool returns a
 structured bundle: structural facts on one side, semantic narrative on
-the other. The calling agent's LLM does the synthesis — askme never
+the other. The calling agent's LLM does the synthesis — kbask never
 calls a model itself.
 """
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from askme.backends import graphify, understand
+from kbask.backends import graphify, understand
 
 
 def _node_source_files(struct_result: Dict[str, Any]) -> List[str]:

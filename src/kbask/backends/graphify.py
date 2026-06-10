@@ -19,7 +19,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from askme import state
+from kbask import state
 
 
 class GraphifyUnavailable(RuntimeError):
@@ -85,7 +85,7 @@ def _load() -> Dict[str, Any]:
     path = state.graph_path()
     if not path.exists():
         raise GraphifyUnavailable(
-            f"graph.json not found at {path}. Run `askme update <repo>` first."
+            f"graph.json not found at {path}. Run `kbask update <repo>` first."
         )
     key = str(path.resolve()) + ":" + str(path.stat().st_mtime_ns)
     if _graph_cache.get("key") == key:
@@ -96,7 +96,7 @@ def _load() -> Dict[str, Any]:
     except ImportError as exc:
         raise GraphifyUnavailable(
             "graphifyy not installed in this environment. "
-            "Install via `uv pip install graphifyy` or the askme-mcp extras."
+            "Install via `uv pip install graphifyy` or the kbask-mcp extras."
         ) from exc
 
     G = gs._load_graph(str(path))
@@ -195,7 +195,7 @@ def get_community(community_id: int) -> Dict[str, Any]:
 
 
 def god_nodes(top_n: int = 10, limit: Optional[int] = None) -> Dict[str, Any]:
-    # Accept either `top_n` (graphify convention) or `limit` (askme schema).
+    # Accept either `top_n` (graphify convention) or `limit` (kbask schema).
     cache = _load()
     G = cache["G"]
     from graphify.analyze import god_nodes as _god  # type: ignore[import-not-found]

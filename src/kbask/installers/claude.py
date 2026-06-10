@@ -1,13 +1,12 @@
-"""Install askme MCP server into Gemini CLI ~/.gemini/settings.json."""
+"""Install kbask MCP server into Claude Code project-scope .mcp.json."""
 
 from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 
-from askme.installers.common import (
+from kbask.installers.common import (
     SERVER_NAME,
     backup,
     resolve_out_dir,
@@ -18,13 +17,9 @@ from askme.installers.common import (
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--repo", default=".", help="Repo root containing askme-out/.")
-    parser.add_argument(
-        "--gemini-home",
-        default=os.environ.get("GEMINI_HOME", str(Path.home() / ".gemini")),
-        help="Gemini home dir. Defaults to $GEMINI_HOME or ~/.gemini.",
-    )
-    parser.add_argument("--source", help="uvx --from value. Defaults to $ASKME_SOURCE or the git repo.")
+    parser.add_argument("--repo", default=".", help="Repo root containing kbask-out/.")
+    parser.add_argument("--config", help="Override .mcp.json path. Defaults to <repo>/.mcp.json.")
+    parser.add_argument("--source", help="uvx --from value. Defaults to $KBASK_SOURCE or the git repo.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--skip-smoke-test", action="store_true")
 
@@ -32,17 +27,15 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 def main(args: argparse.Namespace) -> int:
     repo = Path(args.repo).expanduser().resolve()
     out_dir = resolve_out_dir(repo)
-    gemini_home = Path(args.gemini_home).expanduser().resolve()
-    config_path = gemini_home / "settings.json"
+    config_path = Path(args.config).expanduser().resolve() if args.config else repo / ".mcp.json"
 
     uvx = resolve_uvx()
-    entry = {"command": uvx, "args": server_args(out_dir, args.source)}
+    entry = {"type": "stdio", "command": uvx, "args": server_args(out_dir, args.source)}
 
     if args.dry_run:
-        print(json.dumps({"mcpServers": {SERVER_NAME: entry}}, indent=2))
+        print(json.dumps({SERVER_NAME: entry}, indent=2))
         return 0
 
-    gemini_home.mkdir(parents=True, exist_ok=True)
     if config_path.exists():
         data = json.loads(config_path.read_text(encoding="utf-8"))
         print(f"backup: {backup(config_path)}")
@@ -55,5 +48,5 @@ def main(args: argparse.Namespace) -> int:
 
     if not args.skip_smoke_test:
         smoke_test(uvx, server_args(out_dir, args.source))
-    print("restart Gemini CLI to load the new MCP server")
+    print("restart Claude Code to load the new MCP server")
     return 0

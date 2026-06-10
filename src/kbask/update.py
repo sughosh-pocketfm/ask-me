@@ -1,4 +1,4 @@
-"""Incremental update orchestrator: `askme update <repo>`."""
+"""Incremental update orchestrator: `kbask update <repo>`."""
 
 from __future__ import annotations
 
@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-from askme import __version__
-from askme.backends import graphify, understand
-from askme.diff import Delta, carry_forward, compute
-from askme.meta import Meta, hash_file, load, now_iso, save
+from kbask import __version__
+from kbask.backends import graphify, understand
+from kbask.diff import Delta, carry_forward, compute
+from kbask.meta import Meta, hash_file, load, now_iso, save
 
 
-logger = logging.getLogger("askme.update")
+logger = logging.getLogger("kbask.update")
 
 
 # File extensions considered for per-file semantic indexing. Conservative
@@ -38,7 +38,7 @@ def _git_sha(repo: Path) -> str:
 
 def _walk_sources(repo: Path) -> Iterable[Path]:
     """Yield source files Graphify would consider. Skips common vendor / build dirs."""
-    skip = {".git", "node_modules", "build", "dist", ".gradle", "askme-out", "graphify-out", "venv", ".venv"}
+    skip = {".git", "node_modules", "build", "dist", ".gradle", "kbask-out", "graphify-out", "venv", ".venv"}
     for path in repo.rglob("*"):
         if path.is_dir():
             continue
@@ -57,9 +57,9 @@ def _hash_repo(repo: Path) -> Dict[str, str]:
 
 
 def run(repo: Path, *, force: bool, dry_run: bool, structural_only: bool) -> int:
-    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="askme: %(message)s")
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="kbask: %(message)s")
 
-    out_dir = repo / "askme-out"
+    out_dir = repo / "kbask-out"
     graph_path = out_dir / "graph.json"
     knowledge_graph_path = out_dir / "knowledge-graph.json"
     meta_path = out_dir / "meta.json"
@@ -100,7 +100,7 @@ def run(repo: Path, *, force: bool, dry_run: bool, structural_only: bool) -> int
 
     new_files = carry_forward(previous, delta, current_hashes)
     new_meta = Meta(
-        askme_version=__version__,
+        kbask_version=__version__,
         graphify_version=graphify.version(),
         understand_version=understand.version(),
         git_sha=_git_sha(repo),
@@ -113,7 +113,7 @@ def run(repo: Path, *, force: bool, dry_run: bool, structural_only: bool) -> int
 
 
 def _print_plan(delta: Delta, *, structural_only: bool) -> None:
-    print("askme update plan (dry-run)")
+    print("kbask update plan (dry-run)")
     print(f"  added:     {len(delta.added)}")
     print(f"  modified:  {len(delta.modified)}")
     print(f"  removed:   {len(delta.removed)}")

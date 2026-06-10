@@ -1,4 +1,4 @@
-"""Top-level CLI dispatcher for askme."""
+"""Top-level CLI dispatcher for kbask."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import Sequence
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="askme",
+        prog="kbask",
         description="Hybrid MCP server combining Graphify + Understand-Anything.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -19,11 +19,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument(
         "out_dir",
         nargs="?",
-        default="askme-out",
-        help="Path to the askme-out directory. Defaults to ./askme-out.",
+        default="kbask-out",
+        help="Path to the kbask-out directory. Defaults to ./kbask-out.",
     )
 
-    p_update = sub.add_parser("update", help="Build or refresh askme-out incrementally.")
+    p_update = sub.add_parser("update", help="Build or refresh kbask-out incrementally.")
     p_update.add_argument("repo", nargs="?", default=".", help="Repo root. Defaults to cwd.")
     p_update.add_argument("--force", action="store_true", help="Full rebuild, ignore meta.json.")
     p_update.add_argument("--dry-run", action="store_true", help="Report planned work, no writes.")
@@ -35,7 +35,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_install = sub.add_parser(
         "install",
-        help="Install askme MCP server into a host config.",
+        help="Install kbask MCP server into a host config.",
     )
     p_install.add_argument(
         "host",
@@ -57,12 +57,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
 
     if args.command == "serve":
-        from askme.serve import run
+        from kbask.serve import run
 
         return run(Path(args.out_dir).resolve())
 
     if args.command == "update":
-        from askme.update import run
+        from kbask.update import run
 
         return run(
             repo=Path(args.repo).resolve(),
@@ -72,12 +72,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     if args.command == "install":
-        from askme.install import run
+        from kbask.install import run
 
         return run(host=args.host, extra_args=args.host_args)
 
     if args.command == "health":
-        from askme.health import run
+        from kbask.health import run
 
         return run()
 

@@ -1,8 +1,8 @@
-# askme-mcp
+# kbask-mcp
 
 Hybrid MCP server that combines **[Graphify](https://github.com/graphifyy)** (structural code graphs) with **[Understand-Anything](https://github.com/Lum1104/Understand-Anything)** (LLM-derived semantic knowledge bases) into a single MCP endpoint.
 
-Graphify tells you **where** things are. Understand-Anything tells you **why** they exist. `askme` joins both and exposes them as MCP tools usable from Claude Code, Codex, Gemini CLI, and any other MCP-compatible host.
+Graphify tells you **where** things are. Understand-Anything tells you **why** they exist. `kbask` joins both and exposes them as MCP tools usable from Claude Code, Codex, Gemini CLI, and any other MCP-compatible host.
 
 ---
 
@@ -13,7 +13,7 @@ Graphify tells you **where** things are. Understand-Anything tells you **why** t
 | Graphify | Exact, cheap, deterministic AST graph (calls, imports, ownership) | No semantics — doesn't know *why* code exists |
 | Understand-Anything | Semantic narrative, domain knowledge, onboarding context | Expensive to build, fuzzy, no edge-precise lookups |
 
-`askme` gives you:
+`kbask` gives you:
 
 - **All 7 Graphify tools** (`query_graph`, `get_node`, `get_neighbors`, `get_community`, `god_nodes`, `graph_stats`, `shortest_path`) pass-through
 - **5 semantic tools** from Understand-Anything (`semantic_explain`, `semantic_chat`, `semantic_diff`, `semantic_onboard`, `semantic_domain`)
@@ -30,13 +30,13 @@ Graphify tells you **where** things are. Understand-Anything tells you **why** t
 
 ```bash
 cd /path/to/your/project
-uvx --from askme-mcp askme update .
+uvx --from kbask-mcp kbask update .
 ```
 
-This produces `askme-out/` with:
+This produces `kbask-out/` with:
 
 ```
-askme-out/
+kbask-out/
 ├── graph.json              # Graphify structural graph
 ├── knowledge-graph.json    # Understand-Anything semantic graph
 └── meta.json               # per-file hashes, versions, last-build timestamps
@@ -44,32 +44,32 @@ askme-out/
 
 The first run rebuilds everything. Subsequent runs are **incremental** — only files whose content hash changed since the last build are re-analyzed. Token cost scales with diff size, not repo size.
 
-### 2. Wire `askme` into your MCP host
+### 2. Wire `kbask` into your MCP host
 
 Pick the installer for your host (see [Host setup](#host-setup) below):
 
 ```bash
 # Claude Code (project-scope .mcp.json)
-uvx --from askme-mcp askme install claude
+uvx --from kbask-mcp kbask install claude
 
 # Codex CLI
-uvx --from askme-mcp askme install codex
+uvx --from kbask-mcp kbask install codex
 
 # Gemini CLI
-uvx --from askme-mcp askme install gemini
+uvx --from kbask-mcp kbask install gemini
 ```
 
-Each installer writes a single `askme` MCP server entry pointing at `askme-out/` in the current project, with a timestamped backup of any existing config and a post-install MCP smoke test.
+Each installer writes a single `kbask` MCP server entry pointing at `kbask-out/` in the current project, with a timestamped backup of any existing config and a post-install MCP smoke test.
 
 ### 3. Use it from your agent
 
 Any MCP-compatible host can now call:
 
 ```
-askme.ask("how does login retry work?")
-askme.trace("LoginViewModel", "AuthRepository")
-askme.query_graph("ExoPlayer initialisation")
-askme.semantic_explain("aural/player/data/.../PlayerManager.kt")
+kbask.ask("how does login retry work?")
+kbask.trace("LoginViewModel", "AuthRepository")
+kbask.query_graph("ExoPlayer initialisation")
+kbask.semantic_explain("aural/player/data/.../PlayerManager.kt")
 ```
 
 ---
@@ -95,64 +95,64 @@ gh api repos/sughosh-pocketfm/ask-me/contents/install.sh \
 The bootstrap script:
 1. Configures git credentials via `gh auth setup-git` (so `uvx` can fetch the private repo).
 2. Installs `uv` if missing.
-3. Runs `uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install <host> --repo $(pwd)`.
+3. Runs `uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install <host> --repo $(pwd)`.
 
 ### Skip the bootstrap (`uvx` direct)
 
 ```bash
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install claude --repo .
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install codex  --repo .
-uvx --from git+https://github.com/sughosh-pocketfm/ask-me askme install gemini --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install claude --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install codex  --repo .
+uvx --from git+https://github.com/sughosh-pocketfm/ask-me kbask install gemini --repo .
 ```
 
 What it does:
 
-1. Creates `<repo>/askme-out/` if missing.
-2. Appends `askme-out/` to `<repo>/.gitignore`.
+1. Creates `<repo>/kbask-out/` if missing.
+2. Appends `kbask-out/` to `<repo>/.gitignore`.
 3. Writes/upserts the host's config (with a timestamped backup of any existing file).
 4. Runs an MCP `initialize` + `tools/list` smoke test against the configured server.
 
 Override the source if you fork the repo or pin to a tag:
 
 ```bash
-ASKME_SOURCE=git+https://github.com/your-fork/ask-me@v0.2.0 \
-  uvx --from $ASKME_SOURCE askme install claude --repo .
+KBASK_SOURCE=git+https://github.com/your-fork/ask-me@v0.2.0 \
+  uvx --from $KBASK_SOURCE kbask install claude --repo .
 ```
 
-Once PyPI publish lands you can swap `git+https://...` for `askme-mcp`.
+Once PyPI publish lands you can swap `git+https://...` for `kbask-mcp`.
 
 ---
 
 ## Incremental updates
 
-`askme update` is a single command. There is no `--structural` / `--semantic` split — `askme` figures out what changed and only regenerates the missing slice:
+`kbask update` is a single command. There is no `--structural` / `--semantic` split — `kbask` figures out what changed and only regenerates the missing slice:
 
 ```
-askme update .
+kbask update .
 ├── 1. Run Graphify → new graph.json
 ├── 2. Diff per-file content hashes against meta.json
 │      → dirty = added | modified
 │      → preserved = unchanged
 │      → removed = deleted from repo
-├── 3. Mirror <repo>/.understand-anything/knowledge-graph.json → askme-out/
+├── 3. Mirror <repo>/.understand-anything/knowledge-graph.json → kbask-out/
 ├── 4. Carry forward unchanged file entries; mark dirty/removed in meta.json
 └── 5. Write meta.json (new hashes, timestamps, versions)
 ```
 
-> **Note on the semantic graph.** Understand-Anything has no self-running analyzer — its knowledge graph is built by an LLM (Claude Code) following the upstream plugin's prompts and persisted to `<repo>/.understand-anything/knowledge-graph.json`. `askme update` *mirrors* that file into `askme-out/`; rebuilding the upstream graph is owned by the LLM (e.g. `/understand-update` in Claude Code). If `<repo>/.understand-anything/` is absent, semantic tools still report a clean "not built" error and structural tools keep working.
+> **Note on the semantic graph.** Understand-Anything has no self-running analyzer — its knowledge graph is built by an LLM (Claude Code) following the upstream plugin's prompts and persisted to `<repo>/.understand-anything/knowledge-graph.json`. `kbask update` *mirrors* that file into `kbask-out/`; rebuilding the upstream graph is owned by the LLM (e.g. `/understand-update` in Claude Code). If `<repo>/.understand-anything/` is absent, semantic tools still report a clean "not built" error and structural tools keep working.
 
 Flags:
 
-- `askme update .` — incremental (default)
-- `askme update . --force` — full rebuild, ignore meta.json
-- `askme update . --dry-run` — print planned work, no writes
-- `askme update . --structural-only` — Graphify only, skip semantic mirror
+- `kbask update .` — incremental (default)
+- `kbask update . --force` — full rebuild, ignore meta.json
+- `kbask update . --dry-run` — print planned work, no writes
+- `kbask update . --structural-only` — Graphify only, skip semantic mirror
 
 ---
 
 ## Host setup
 
-`askme` follows the MCP spec strictly (JSON-RPC 2.0 over stdio, standard tool schemas). It works in any host that speaks MCP.
+`kbask` follows the MCP spec strictly (JSON-RPC 2.0 over stdio, standard tool schemas). It works in any host that speaks MCP.
 
 ### Claude Code
 
@@ -161,29 +161,29 @@ Project-scope `.mcp.json` at your repo root:
 ```json
 {
   "mcpServers": {
-    "askme": {
+    "kbask": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "askme-mcp", "--with", "mcp", "askme", "serve", "askme-out/"]
+      "args": ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "kbask-out/"]
     }
   }
 }
 ```
 
-Or run `uvx --from askme-mcp askme install claude` to write this for you.
+Or run `uvx --from kbask-mcp kbask install claude` to write this for you.
 
 ### Codex CLI
 
 Writes to `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`):
 
 ```toml
-[mcp_servers.askme]
-args = ["--from", "askme-mcp", "--with", "mcp", "askme", "serve", "/absolute/path/to/askme-out"]
+[mcp_servers.kbask]
+args = ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
 command = "uvx"
 startup_timeout_sec = 120
 ```
 
-Run `uvx --from askme-mcp askme install codex` to write this for you.
+Run `uvx --from kbask-mcp kbask install codex` to write this for you.
 
 ### Gemini CLI
 
@@ -192,15 +192,15 @@ Writes `mcpServers` block into `~/.gemini/settings.json`:
 ```json
 {
   "mcpServers": {
-    "askme": {
+    "kbask": {
       "command": "uvx",
-      "args": ["--from", "askme-mcp", "--with", "mcp", "askme", "serve", "/absolute/path/to/askme-out"]
+      "args": ["--from", "kbask-mcp", "--with", "mcp", "kbask", "serve", "/absolute/path/to/kbask-out"]
     }
   }
 }
 ```
 
-Run `uvx --from askme-mcp askme install gemini` to write this for you.
+Run `uvx --from kbask-mcp kbask install gemini` to write this for you.
 
 ### AGY
 
@@ -208,7 +208,7 @@ Run `uvx --from askme-mcp askme install gemini` to write this for you.
 
 ### Other MCP hosts
 
-`askme serve <askme-out-dir>` speaks stdio MCP. Wire it the same way as any stdio MCP server in your host of choice.
+`kbask serve <kbask-out-dir>` speaks stdio MCP. Wire it the same way as any stdio MCP server in your host of choice.
 
 ---
 
@@ -239,7 +239,7 @@ All tools return structured JSON. None of them call an LLM internally — they r
 ## Architecture
 
 ```
-askme-mcp (Python, stdio MCP)
+kbask-mcp (Python, stdio MCP)
 ├── backends/
 │   ├── graphify.py        # imports graphifyy as a library (no subprocess)
 │   └── understand.py      # spawns Node subprocess against @understand-anything/core
@@ -269,7 +269,7 @@ Design rules:
 |---|---|
 | Repo scaffold + MCP stdio entry | ✅ |
 | Graphify pass-through tools | 🚧 wiring in progress |
-| Incremental `askme update` | ✅ implemented (structural rebuild + semantic mirror) |
+| Incremental `kbask update` | ✅ implemented (structural rebuild + semantic mirror) |
 | Structural MCP tools (Graphify) | ✅ wired via `graphify.serve` internals |
 | Semantic MCP tools (Understand-Anything) | ✅ read knowledge-graph.json directly |
 | Hybrid `ask` / `trace` / `onboard` | ✅ compose structural + semantic |

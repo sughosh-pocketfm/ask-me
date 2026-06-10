@@ -1,4 +1,4 @@
-"""Process-wide state for the askme MCP server.
+"""Process-wide state for the kbask MCP server.
 
 The MCP server runs as a long-lived process. Tool handlers need access
 to the active out-dir (which holds graph.json + knowledge-graph.json)
@@ -24,7 +24,7 @@ def set_out_dir(path: Path) -> None:
 def out_dir() -> Path:
     if _out_dir is None:
         raise RuntimeError(
-            "askme: state.out_dir not initialized. "
+            "kbask: state.out_dir not initialized. "
             "Set it via state.set_out_dir() before invoking any tool."
         )
     return _out_dir

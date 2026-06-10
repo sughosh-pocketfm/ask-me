@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
-SERVER_NAME = "askme"
+SERVER_NAME = "kbask"
 
 # `uvx --from <SOURCE>` value. Until PyPI publish, default to the git repo so
-# `uvx` fetches askme-mcp straight from GitHub. Override with $ASKME_SOURCE or
+# `uvx` fetches kbask-mcp straight from GitHub. Override with $KBASK_SOURCE or
 # --source.
 DEFAULT_SOURCE = "git+https://github.com/sughosh-pocketfm/ask-me"
 
@@ -40,12 +40,12 @@ def resolve_uvx() -> str:
 
 
 def resolve_out_dir(repo: Path) -> Path:
-    out = (repo / "askme-out").resolve()
+    out = (repo / "kbask-out").resolve()
     if not out.exists():
         out.mkdir(parents=True, exist_ok=True)
         print(f"created {out}")
-        print(f"populate it with:  uvx --from {DEFAULT_SOURCE} askme update .")
-    ensure_gitignore(repo, "askme-out/")
+        print(f"populate it with:  uvx --from {DEFAULT_SOURCE} kbask update .")
+    ensure_gitignore(repo, "kbask-out/")
     return out
 
 
@@ -67,14 +67,14 @@ def ensure_gitignore(repo: Path, pattern: str) -> None:
 
 
 def resolve_source(explicit: str | None = None) -> str:
-    return explicit or os.environ.get("ASKME_SOURCE") or DEFAULT_SOURCE
+    return explicit or os.environ.get("KBASK_SOURCE") or DEFAULT_SOURCE
 
 
 def server_args(out_dir: Path, source: str | None = None) -> List[str]:
     return [
         "--from", resolve_source(source),
         "--with", "mcp",
-        "askme", "serve", str(out_dir),
+        "kbask", "serve", str(out_dir),
     ]
 
 
@@ -99,7 +99,7 @@ def smoke_test(command: str, args: List[str], timeout_sec: int = 20) -> None:
                 "params": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {},
-                    "clientInfo": {"name": "askme-installer", "version": "0"},
+                    "clientInfo": {"name": "kbask-installer", "version": "0"},
                 },
             },
             {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}},

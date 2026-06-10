@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, Set
 
-from askme.meta import FileEntry, Meta
+from kbask.meta import FileEntry, Meta
 
 
 @dataclass

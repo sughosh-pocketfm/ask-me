@@ -1,4 +1,4 @@
-# CLAUDE.md — askme-mcp
+# CLAUDE.md — kbask-mcp
 
 Guidance for Claude Code (and other AI agents) working in this repo.
 
@@ -6,7 +6,7 @@ Guidance for Claude Code (and other AI agents) working in this repo.
 
 ## What this project is
 
-`askme-mcp` is a single Python MCP (Model Context Protocol) server that
+`kbask-mcp` is a single Python MCP (Model Context Protocol) server that
 joins two upstream code-analysis tools into one MCP endpoint:
 
 - **[Graphify](https://pypi.org/project/graphifyy/)** — deterministic
@@ -19,13 +19,13 @@ joins two upstream code-analysis tools into one MCP endpoint:
 The product value is the **hybrid** layer (`ask` / `trace` / `onboard`),
 which queries the structural graph and decorates the result with the
 semantic graph's narrative. The host LLM (Claude / Codex / Gemini) does
-the synthesis — `askme` itself never calls a model.
+the synthesis — `kbask` itself never calls a model.
 
 Host-agnostic: works in any MCP-compatible client (Claude Code, Codex
 CLI, Gemini CLI, AGY future).
 
 Public repo: <https://github.com/sughosh-pocketfm/ask-me>.
-PyPI name target: `askme-mcp` (fallback `kbask`).
+PyPI name target: `kbask-mcp` (fallback `kbask`).
 
 ---
 
@@ -40,12 +40,12 @@ PyPI name target: `askme-mcp` (fallback `kbask`).
   (`auto-update-prompt.md`). The output lives at
   `<repo>/.understand-anything/knowledge-graph.json`.
 
-So `askme update` does *not* rebuild the semantic graph from scratch. It:
+So `kbask update` does *not* rebuild the semantic graph from scratch. It:
 
 1. Runs `graphify update` for the structural side.
 2. **Mirrors** the upstream `.understand-anything/knowledge-graph.json`
-   into `askme-out/knowledge-graph.json` if present.
-3. Tracks per-file content hashes in `askme-out/meta.json` for incremental
+   into `kbask-out/knowledge-graph.json` if present.
+3. Tracks per-file content hashes in `kbask-out/meta.json` for incremental
    change detection.
 
 If `.understand-anything/` is absent, structural tools still work; the
@@ -55,7 +55,7 @@ right command in their host (`/understand-update` in Claude Code).
 **Do not** try to write a "real" understand-anything analyzer here. If
 you find yourself spawning Node subprocesses to invoke
 `@understand-anything/core`'s graph builder, you are off-path. The
-upstream design owns rebuilding; askme owns serving.
+upstream design owns rebuilding; kbask owns serving.
 
 ---
 
@@ -67,14 +67,14 @@ ask-me/
 ├── README.md                   # user-facing docs
 ├── CLAUDE.md                   # ← you are here
 ├── LICENSE                     # MIT
-├── .gitignore                  # ignores askme-out/, *.pyc, etc
-├── src/askme/
+├── .gitignore                  # ignores kbask-out/, *.pyc, etc
+├── src/kbask/
 │   ├── __init__.py             # __version__
 │   ├── cli.py                  # argparse dispatcher → {serve, update, install, health}
 │   ├── serve.py                # MCP stdio server, tool registry
 │   ├── update.py               # incremental update orchestrator
-│   ├── install.py              # `askme install <host>` → dispatch to scripts/install-*.py
-│   ├── health.py               # `askme health` reporter
+│   ├── install.py              # `kbask install <host>` → dispatch to scripts/install-*.py
+│   ├── health.py               # `kbask health` reporter
 │   ├── state.py                # process-wide out_dir holder (set by serve.run)
 │   ├── meta.py                 # meta.json schema + IO + hash_file
 │   ├── diff.py                 # per-file delta (added/modified/removed/unchanged)
@@ -85,14 +85,14 @@ ask-me/
 │       ├── structural.py       # passthrough to backends.graphify
 │       ├── semantic.py         # passthrough to backends.understand
 │       └── hybrid.py           # ask / trace / onboard — compose both
-│   ├── installers/             # ships in wheel — `askme install <host>` dispatcher
-│   │   ├── common.py           # backup/upsert/smoke-test, $ASKME_SOURCE default
+│   ├── installers/             # ships in wheel — `kbask install <host>` dispatcher
+│   │   ├── common.py           # backup/upsert/smoke-test, $KBASK_SOURCE default
 │   │   ├── claude.py           # writes <repo>/.mcp.json (project-scope)
 │   │   ├── codex.py            # writes ~/.codex/config.toml
 │   │   ├── gemini.py           # writes ~/.gemini/settings.json
 │   │   └── agy.py              # placeholder, format unknown
 ├── scripts/
-│   └── install-{host}.py       # thin trampolines into askme.installers.*
+│   └── install-{host}.py       # thin trampolines into kbask.installers.*
 └── tests/
     └── test_diff.py            # delta logic tests (added/modified/removed/unchanged)
 ```
@@ -103,11 +103,11 @@ In the **user's** project repo at runtime:
 <user-repo>/
 ├── .git/
 ├── .understand-anything/
-│   ├── knowledge-graph.json    # LLM-built upstream — askme INPUT
+│   ├── knowledge-graph.json    # LLM-built upstream — kbask INPUT
 │   └── meta.json
 ├── graphify-out/
-│   └── graph.json              # graphify CLI output, askme INPUT
-└── askme-out/                  # askme OUTPUT — gitignored
+│   └── graph.json              # graphify CLI output, kbask INPUT
+└── kbask-out/                  # kbask OUTPUT — gitignored
     ├── graph.json              # mirrored from graphify-out/
     ├── knowledge-graph.json    # mirrored from .understand-anything/
     ├── knowledge-graph.meta.json
@@ -121,9 +121,9 @@ In the **user's** project repo at runtime:
 ### Startup
 ```
 host (Claude/Codex/Gemini)
-  └─ spawns: uvx --from askme-mcp askme serve <askme-out>
-       └─ askme.cli.main()
-            └─ askme.serve.run(out_dir)
+  └─ spawns: uvx --from kbask-mcp kbask serve <kbask-out>
+       └─ kbask.cli.main()
+            └─ kbask.serve.run(out_dir)
                  ├─ state.set_out_dir(out_dir)
                  ├─ register 15 tools in _TOOLS dict
                  └─ mcp.server.stdio.stdio_server → JSON-RPC 2.0 loop
@@ -144,7 +144,7 @@ host → JSON-RPC {tools/call, name: "query_graph", args: {...}}
 
 ### State
 
-`askme.state` holds ONE thing: the absolute path to `askme-out/`. It is
+`kbask.state` holds ONE thing: the absolute path to `kbask-out/`. It is
 set exactly once, by `serve.run`. Every backend reads from it via
 `state.graph_path()`, `state.knowledge_graph_path()`, `state.meta_path()`.
 
@@ -188,7 +188,7 @@ Tool handlers MUST:
    - `validate_server_name(name)` — guard against config injection
    - `backup_with_timestamp(path)` — never overwrite without a `.bak.<ts>`
    - `smoke_test(command, args)` — JSON-RPC `initialize` + `tools/list`
-3. Resolve `askme-out/` to an **absolute path** before writing config —
+3. Resolve `kbask-out/` to an **absolute path** before writing config —
    relative paths break when hosts spawn from a different cwd.
 4. Test against a real installation of the target host.
 
@@ -214,7 +214,7 @@ Tool handlers MUST:
 ## What NOT to do
 
 - ❌ Do **not** import `mcp` at module top-level outside of `serve.py`.
-  It's an optional runtime dep — keep imports lazy so `askme update`
+  It's an optional runtime dep — keep imports lazy so `kbask update`
   works without it.
 - ❌ Do **not** write to stdout from tool handlers or backends.
 - ❌ Do **not** rebuild Understand-Anything's knowledge graph here. See
@@ -223,7 +223,7 @@ Tool handlers MUST:
   hooks in the MCP server. The host owns cadence.
 - ❌ Do **not** add host-specific behavior to the MCP server. If a host
   needs a quirk, that lives in its installer script.
-- ❌ Do **not** commit `askme-out/` or any `*.json` produced by tools.
+- ❌ Do **not** commit `kbask-out/` or any `*.json` produced by tools.
   `.gitignore` already covers it.
 - ❌ Do **not** depend on `networkx` or `tree-sitter` directly — both
   arrive transitively through `graphifyy`. Re-pinning them ourselves
@@ -237,14 +237,14 @@ Tool handlers MUST:
 ```bash
 # from a sibling repo that has a graphify-out/ and .understand-anything/:
 PYTHONPATH=/Users/pocketfm/work/ask-me/src \
-  python3 -m askme.cli update .
+  python3 -m kbask.cli update .
 
 PYTHONPATH=/Users/pocketfm/work/ask-me/src \
-  python3 -m askme.cli health
+  python3 -m kbask.cli health
 
 # MCP stdio server (rare to test directly; usually via a host):
 PYTHONPATH=/Users/pocketfm/work/ask-me/src \
-  python3 -m askme.cli serve askme-out/
+  python3 -m kbask.cli serve kbask-out/
 ```
 
 ### Run tests
@@ -263,14 +263,14 @@ tests are plain `assert`s, runnable directly.)
 
 ### Install into a host (against the local checkout)
 ```bash
-python3 scripts/install-claude.py /path/to/target/repo --askme-out /path/to/askme-out
-python3 scripts/install-codex.py  --askme-out /path/to/askme-out
-python3 scripts/install-gemini.py --askme-out /path/to/askme-out
+python3 scripts/install-claude.py /path/to/target/repo --kbask-out /path/to/kbask-out
+python3 scripts/install-codex.py  --kbask-out /path/to/kbask-out
+python3 scripts/install-gemini.py --kbask-out /path/to/kbask-out
 ```
 
 ### Bump version
 - `pyproject.toml` → `version`
-- `src/askme/__init__.py` → `__version__`
+- `src/kbask/__init__.py` → `__version__`
 - Keep them in sync. Tag commit `v0.x.y`.
 
 ---

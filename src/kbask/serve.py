@@ -14,11 +14,11 @@ import sys
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict
 
-from askme import state
-from askme.tools import hybrid, semantic, structural
+from kbask import state
+from kbask.tools import hybrid, semantic, structural
 
 
-logger = logging.getLogger("askme.serve")
+logger = logging.getLogger("kbask.serve")
 
 
 # Tool registry: name -> (handler, jsonschema input spec, description).
@@ -182,13 +182,13 @@ _TOOLS: Dict[str, Dict[str, Any]] = {
 
 
 def run(out_dir: Path) -> int:
-    """Entry point for `askme serve <out_dir>`. Routes to the MCP stdio server."""
+    """Entry point for `kbask serve <out_dir>`. Routes to the MCP stdio server."""
     # Log to stderr — stdout is sacred (JSON-RPC frames live there).
-    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="askme: %(message)s")
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="kbask: %(message)s")
 
     state.set_out_dir(out_dir)
     if not out_dir.exists():
-        logger.warning("askme-out directory %s does not exist; serving in degraded mode", out_dir)
+        logger.warning("kbask-out directory %s does not exist; serving in degraded mode", out_dir)
 
     try:
         from mcp.server import Server
@@ -198,7 +198,7 @@ def run(out_dir: Path) -> int:
         logger.error("mcp package not installed: %s", exc)
         return 1
 
-    server: "Server" = Server("askme")
+    server: "Server" = Server("kbask")
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
@@ -213,8 +213,8 @@ def run(out_dir: Path) -> int:
         if spec is None:
             return [TextContent(type="text", text=json.dumps({"error": f"unknown tool: {name}"}))]
         handler: Callable[..., Any] = spec["fn"]
-        from askme.backends.graphify import GraphifyUnavailable
-        from askme.backends.understand import UnderstandUnavailable
+        from kbask.backends.graphify import GraphifyUnavailable
+        from kbask.backends.understand import UnderstandUnavailable
         try:
             result = handler(**(arguments or {}))
         except NotImplementedError as exc:

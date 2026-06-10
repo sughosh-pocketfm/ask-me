@@ -1,4 +1,4 @@
-"""Install askme MCP server into Codex CLI config.toml."""
+"""Install kbask MCP server into Codex CLI config.toml."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import os
 import re
 from pathlib import Path
 
-from askme.installers.common import (
+from kbask.installers.common import (
     SERVER_NAME,
     backup,
     resolve_out_dir,
@@ -45,14 +45,14 @@ def _upsert(config_text: str, name: str, section: str) -> str:
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--repo", default=".", help="Repo root containing askme-out/.")
+    parser.add_argument("--repo", default=".", help="Repo root containing kbask-out/.")
     parser.add_argument(
         "--codex-home",
         default=os.environ.get("CODEX_HOME", str(Path.home() / ".codex")),
         help="Codex home dir. Defaults to $CODEX_HOME or ~/.codex.",
     )
     parser.add_argument("--startup-timeout-sec", type=int, default=120)
-    parser.add_argument("--source", help="uvx --from value. Defaults to $ASKME_SOURCE or the git repo.")
+    parser.add_argument("--source", help="uvx --from value. Defaults to $KBASK_SOURCE or the git repo.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--skip-smoke-test", action="store_true")
 
